@@ -10,12 +10,51 @@
         h1 { text-align: center; color: #1a5276; margin-bottom: 25px; font-size: 1.5rem; }
         #searchBar { width: 100%; padding: 15px; margin-bottom: 20px; border: 2px solid #ddd; border-radius: 25px; box-sizing: border-box; font-size: 1rem; outline: none; transition: 0.3s; }
         #searchBar:focus { border-color: #1a5276; }
-        .medicine-card { border-bottom: 1px solid #eee; padding: 20px 0; animation: fadeIn 0.5s ease; }
+        
+        .medicine-card { 
+            border-bottom: 1px solid #eee; 
+            padding: 20px 0; 
+            animation: fadeIn 0.5s ease; 
+        }
         .medicine-card:last-child { border-bottom: none; }
-        .disease-name { font-weight: bold; color: #d35400; font-size: 1.15rem; margin-bottom: 8px; }
-        .treatment { line-height: 1.8; color: #444; }
-        .warning { background-color: #fdf2f2; color: #c0392b; padding: 8px 12px; border-radius: 6px; font-size: 0.9rem; margin-top: 10px; border-left: 4px solid #c0392b; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .disease-name { font-weight: bold; color: #d35400; font-size: 1.15rem; margin-bottom: 12px; display: flex; align-items: center; }
+        .disease-name::before { content: '🎯'; margin-right: 8px; }
+        
+        .treatment-section { 
+            line-height: 1.8; 
+            color: #444; 
+            background: #f9f9f9;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        .warning { 
+            background-color: #fdf2f2; 
+            color: #c0392b; 
+            padding: 10px 15px; 
+            border-radius: 6px; 
+            font-size: 0.9rem; 
+            margin-top: 10px; 
+            border-left: 4px solid #c0392b; 
+        }
+        .source-tag {
+            font-size: 0.75rem;
+            color: #7f8c8d;
+            margin-top: 5px;
+            font-style: italic;
+        }
+
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: translateY(10px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+
+        /* Loading Spinner */
+        .loader {
+            text-align: center;
+            color: #1a5276;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -25,24 +64,30 @@
     <input type="text" id="searchBar" placeholder="ရောဂါအမည်ဖြင့် ရှာဖွေပါ..." onkeyup="searchMedicine()">
     
     <div id="medicineList">
-        <p style="text-align:center;">အချက်အလက်များကို ခေတ္တစောင့်ဆိုင်းပါ...</p>
+        <div class="loader">ဆေးနည်းများကို စုစည်းနေပါသည်...</div>
     </div>
 </div>
 
 <script>
     let allMedicines = [];
 
-    // data.json file ကို လှမ်းဖတ်ခြင်း
-    fetch('data.json')
-        .then(response => response.json())
-        .then(data => {
-            allMedicines = data;
+    // data.json နှင့် extra.json နှစ်ခုလုံးကို တပြိုင်တည်း Fetch လုပ်ခြင်း
+    async function fetchAllData() {
+        try {
+            const [res1, res2] = await Promise.all([
+                fetch('data.json').then(res => res.ok ? res.json() : []),
+                fetch('extra.json').then(res => res.ok ? res.json() : [])
+            ]);
+
+            // Data နှစ်ခုလုံးကို List တစ်ခုထဲ ပေါင်းထည့်လိုက်ခြင်း
+            allMedicines = [...res1, ...res2];
             displayMedicines(allMedicines);
-        })
-        .catch(error => {
-            document.getElementById('medicineList').innerHTML = '<p style="color:red; text-align:center;">Data ဖတ်ရာတွင် အမှားအယွင်းရှိနေပါသည်။ (data.json file ရှိမရှိ စစ်ဆေးပါ)</p>';
+        } catch (error) {
+            document.getElementById('medicineList').innerHTML = 
+                '<p style="color:red; text-align:center;">JSON ဖိုင်များ ဖတ်ရာတွင် အမှားအယွင်းရှိပါသည်။ (data.json နှင့် extra.json ရှိမရှိ စစ်ဆေးပါ)</p>';
             console.error('Error fetching JSON:', error);
-        });
+        }
+    }
 
     function displayMedicines(data) {
         const list = document.getElementById('medicineList');
@@ -50,22 +95,53 @@
             list.innerHTML = '<p style="text-align:center;">ရှာမတွေ့ပါ</p>';
             return;
         }
-        list.innerHTML = data.map(item => `
+
+        // ရောဂါအမည်တူရင် ဆေးနည်းတွေကို ပေါင်းပြမယ့် Logic
+        // Reduce ကိုသုံးပြီး ရောဂါအမည်ကို Key အဖြစ်ထားပြီး Group ဖွဲ့မယ်
+        const grouped = data.reduce((acc, item) => {
+            const key = item.disease.trim();
+            if (!acc[key]) {
+                acc[key] = {
+                    disease: key,
+                    treatments: [item.treatment],
+                    warnings: item.warning ? [item.warning] : []
+                };
+            } else {
+                acc[key].treatments.push(item.treatment);
+                if (item.warning && !acc[key].warnings.includes(item.warning)) {
+                    acc[key].warnings.push(item.warning);
+                }
+            }
+            return acc;
+        }, {});
+
+        // ပေါင်းစည်းထားတဲ့ အချက်အလက်များကို HTML အဖြစ်ပြောင်းလဲခြင်း
+        list.innerHTML = Object.values(grouped).map(item => `
             <div class="medicine-card">
-                <div class="disease-name">🎯 ${item.disease}</div>
-                <div class="treatment">${item.treatment}</div>
-                ${item.warning ? `<div class="warning">⚠️ သတိပြုရန်: ${item.warning}</div>` : ''}
+                <div class="disease-name">${item.disease}</div>
+                <div class="treatment-section">
+                    ${item.treatments.map((t, index) => `<div>${t}</div>${index < item.treatments.length - 1 ? '<hr style="border:0; border-top:1px dashed #ddd; margin:10px 0;">' : ''}`).join('')}
+                </div>
+                ${item.warnings.length > 0 ? `
+                    <div class="warning">
+                        <strong>⚠️ သတိပြုရန်:</strong><br>
+                        ${item.warnings.join('<br>')}
+                    </div>
+                ` : ''}
             </div>
         `).join('');
     }
 
     function searchMedicine() {
-        const input = document.getElementById('searchBar').value.toLowerCase();
+        const input = document.getElementById('searchBar').value.toLowerCase().trim();
         const filteredData = allMedicines.filter(item => 
             item.disease.toLowerCase().includes(input)
         );
         displayMedicines(filteredData);
     }
+
+    // စတင်ချိန်တွင် Data ဖတ်ရန် ခေါ်ယူခြင်း
+    fetchAllData();
 </script>
 
 </body>
