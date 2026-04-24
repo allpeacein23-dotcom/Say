@@ -1,21 +1,32 @@
+/* --- Root Variables & Base Styles --- */
 :root {
     --purple: #673AB7;
     --light-purple: #f3e5f5;
     --text-dark: #333;
+    --text-gray: #666;
     --bg-gray: #f9f9f9;
+    --white: #ffffff;
+    --nav-height: 70px; /* Navigation height ကို သတ်မှတ်ထားခြင်း */
+}
+
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
 }
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
+    padding: 0;
     background-color: var(--bg-gray);
     color: var(--text-dark);
-    -webkit-tap-highlight-color: transparent;
+    line-height: 1.6;
 }
 
+/* --- Header --- */
 header {
     background-color: var(--purple);
-    color: white;
+    color: var(--white);
     padding: 15px;
     text-align: center;
     position: sticky;
@@ -24,74 +35,212 @@ header {
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
-#pageTitle { margin: 0; font-size: 1.2rem; }
+header h2 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 500;
+}
 
-/* Search Area */
-.search-container { padding: 20px; background: white; }
-input {
+/* --- Main Content Area --- */
+main {
+    /* Bottom Nav က ရလဒ်တွေကို မဖုံးစေဖို့ padding ထည့်ထားခြင်း */
+    padding-bottom: calc(var(--nav-height) + 20px);
+    min-height: 100vh;
+}
+
+.page {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- Search Section --- */
+.search-container {
+    padding: 20px;
+    background: var(--white);
+    position: sticky;
+    top: 56px; /* Header ရဲ့ အောက်မှာ ကပ်နေဖို့ */
+    z-index: 999;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+}
+
+input[type="text"] {
     width: 100%;
     padding: 12px 20px;
     border: 1px solid #ddd;
     border-radius: 25px;
     font-size: 16px;
     outline: none;
-    box-sizing: border-box;
     transition: 0.3s;
+    background-color: #f1f1f1;
 }
-input:focus { border-color: var(--purple); box-shadow: 0 0 5px rgba(103, 58, 183, 0.2); }
 
-/* Results List */
-.results-list { padding: 10px; }
-.result-item {
-    background: white;
-    margin-bottom: 10px;
+input[type="text"]:focus {
+    border-color: var(--purple);
+    background-color: var(--white);
+    box-shadow: 0 0 8px rgba(103, 58, 183, 0.2);
+}
+
+/* --- Results List --- */
+.results-list {
     padding: 15px;
-    border-radius: 10px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    cursor: pointer;
-    animation: fadeIn 0.3s ease;
 }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-.result-item strong { color: var(--purple); font-size: 1.1rem; display: block; margin-bottom: 5px; }
-.result-item p { margin: 0; color: #666; font-size: 0.9rem; }
+.result-item {
+    background: var(--white);
+    margin-bottom: 12px;
+    padding: 16px;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    cursor: pointer;
+    transition: transform 0.2s;
+}
 
-/* Bottom Nav */
+.result-item:active {
+    transform: scale(0.98);
+    background-color: #fafafa;
+}
+
+.result-item strong {
+    color: var(--purple);
+    font-size: 1.1rem;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.result-item p {
+    margin: 0;
+    color: var(--text-gray);
+    font-size: 0.9rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2; /* စာကြောင်း ၂ ကြောင်းပဲ ပြမယ် */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* --- Bottom Navigation --- */
 .bottom-nav {
     position: fixed;
     bottom: 0;
     width: 100%;
-    background: white;
+    height: var(--nav-height);
+    background: var(--white);
     display: flex;
     justify-content: space-around;
-    padding: 10px 0;
+    align-items: center;
     border-top: 1px solid #eee;
     z-index: 1000;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
 }
-.nav-item { text-align: center; color: #888; font-size: 0.8rem; cursor: pointer; flex: 1; }
-.nav-item.active { color: var(--purple); font-weight: bold; }
-.nav-item .icon { display: block; font-size: 1.4rem; margin-bottom: 2px; }
 
-/* About Section */
-.about-section { text-align: center; padding: 40px 20px; }
-.app-logo { font-size: 60px; margin-bottom: 15px; }
-.btn-group { margin-top: 30px; }
+.nav-item {
+    text-align: center;
+    color: #888;
+    font-size: 0.75rem;
+    cursor: pointer;
+    flex: 1;
+    padding: 10px 0;
+    transition: 0.3s;
+}
+
+.nav-item.active {
+    color: var(--purple);
+}
+
+.nav-item .icon {
+    display: block;
+    font-size: 1.5rem;
+    margin-bottom: 2px;
+}
+
+/* --- Modal (Detail View) --- */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(3px); /* နောက်ခံကို ဝေဝါးစေခြင်း */
+}
+
+.modal-content {
+    background: var(--white);
+    margin: 10% auto;
+    padding: 25px;
+    width: 88%;
+    max-width: 500px;
+    border-radius: 20px;
+    max-height: 75vh;
+    overflow-y: auto;
+    position: relative;
+    animation: modalSlide 0.3s ease-out;
+}
+
+@keyframes modalSlide {
+    from { transform: translateY(50px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.close {
+    position: absolute;
+    right: 20px;
+    top: 15px;
+    font-size: 28px;
+    color: #999;
+    cursor: pointer;
+}
+
+#modalTitle {
+    color: var(--purple);
+    margin-top: 5px;
+    padding-right: 20px;
+}
+
+#modalBody {
+    line-height: 1.7;
+    white-space: pre-wrap;
+    color: #444;
+    font-size: 1rem;
+}
+
+/* --- About Section --- */
+.about-section {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.app-logo {
+    font-size: 70px;
+    margin-bottom: 10px;
+}
+
+.btn-group {
+    margin-top: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
 .menu-btn {
     width: 100%;
-    padding: 15px;
-    margin-bottom: 10px;
+    padding: 14px;
     border: none;
-    background: white;
-    border-radius: 8px;
+    background: var(--white);
+    border-radius: 12px;
     color: var(--purple);
-    font-size: 1rem;
+    font-size: 0.95rem;
+    font-weight: 500;
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    cursor: pointer;
 }
-.menu-btn.primary { background: var(--purple); color: white; margin-top: 20px; }
 
-/* Modal */
-.modal { display: none; position: fixed; z-index: 2000; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
-.modal-content { background: white; margin: 15% auto; padding: 25px; width: 85%; border-radius: 15px; max-height: 70vh; overflow-y: auto; position: relative; }
-.close { position: absolute; right: 20px; top: 10px; font-size: 28px; color: #aaa; cursor: pointer; }
-#modalBody { line-height: 1.6; white-space: pre-wrap; }
-
+.menu-btn.primary {
+    background: var(--purple);
+    color: var(--white);
+}
