@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>တိုင်းရင်းမြန်မာ အိမ်သုံးဆေးများ</title>
+    <style>
+        body { font-family: sans-serif; background-color: #f4f4f4; padding: 20px; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #2c3e50; }
+        #searchBar { width: 100%; padding: 12px; margin-bottom: 20px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+        .medicine-card { border-bottom: 1px solid #eee; padding: 15px 0; }
+        .medicine-card:last-child { border-bottom: none; }
+        .disease-name { font-weight: bold; color: #e67e22; font-size: 1.2em; }
+        .treatment { margin-top: 5px; line-height: 1.6; }
+        .warning { color: #c0392b; font-size: 0.9em; margin-top: 5px; font-style: italic; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>မြန်မာ့တိုင်းရင်းဆေးနည်းများ</h1>
+    <input type="text" id="searchBar" placeholder="ရောဂါအမည်ဖြင့် ရှာဖွေပါ..." onkeyup="searchMedicine()">
+    
+    <div id="medicineList">
+        </div>
+</div>
+
+<script>
+    // ဆေးနည်း JSON data တွေကို ထည့်
+    const medicineData = [
+        {
+            disease: "ခေါင်းကိုက်ခြင်း",
+            treatment: "ချင်းစိမ်းကို ထောင်း၍ နားထင်တွင် ကပ်ပေးပါ။",
+            warning: "မျက်စိထဲမဝင်စေရန် သတိပြုပါ။"
+        },
+        {
+            disease: "ဗိုက်အောင့်ခြင်း",
+            treatment: "ဆားခါး အနည်းငယ်ကို ရေနွေးဖြင့် သောက်ပါ။",
+            warning: "ကိုယ်ဝန်ဆောင်များ ဆရာဝန်နှင့် တိုင်ပင်ပါ။"
+        }
+    ];
+
+    function displayMedicines(data) {
+        const list = document.getElementById('medicineList');
+        list.innerHTML = data.map(item => `
+            <div class="medicine-card">
+                <div class="disease-name">${item.disease}</div>
+                <div class="treatment">${item.treatment}</div>
+                ${item.warning ? `<div class="warning">သတိပြုရန်: ${item.warning}</div>` : ''}
+            </div>
+        `).join('');
+    }
+
+    function searchMedicine() {
+        const input = document.getElementById('searchBar').value.toLowerCase();
+        const filteredData = medicineData.filter(item => 
+            item.disease.toLowerCase().includes(input)
+        );
+        displayMedicines(filteredData);
+    }
+
+    // စစချင်းမှာ ဆေးနည်းတွေ အကုန်ပြ
+    displayMedicines(medicineData);
+</script>
+
+</body>
+</html>
+
