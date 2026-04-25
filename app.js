@@ -65,17 +65,21 @@ function saveToRecent(item) {
     localStorage.setItem('recent_medicine', JSON.stringify(recent.slice(0, 20)));
 }
 
-// ၅။ Recent List ကို ပြန်ပြခြင်း (Recent Tab နှိပ်သည့်အခါ)
+// ၅။ Recent List ပြန်ပြတဲ့ function ကိုလည်း update လုပ်ထားဖို့လိုပါတယ်
 function loadRecent() {
     const listDiv = document.getElementById('recentList');
+    const clearBtn = document.getElementById('clearBtn');
     const recent = JSON.parse(localStorage.getItem('recent_medicine')) || [];
     
     if (recent.length === 0) {
         listDiv.innerHTML = "<p style='text-align:center; padding:50px; color:#999;'>ရှာဖွေမှုမှတ်တမ်း မရှိသေးပါ။</p>";
+        if(clearBtn) clearBtn.style.display = "none"; // မှတ်တမ်းမရှိရင် ခလုတ်ဖျောက်ထားမယ်
         return;
     }
 
+    if(clearBtn) clearBtn.style.display = "block"; // မှတ်တမ်းရှိရင် ခလုတ်ပြန်ပြမယ်
     listDiv.innerHTML = "";
+    
     recent.forEach(item => {
         const div = document.createElement('div');
         div.className = "result-item";
@@ -83,6 +87,15 @@ function loadRecent() {
         div.onclick = () => openDetail(item);
         listDiv.appendChild(div);
     });
+}
+
+// ၆။ Recent အားလုံးကို ဖျက်ခြင်း
+function clearRecent() {
+    // Confirm box ပြချင်ရင် သုံးပါ (မသုံးချင်ရင် direct ဖျက်လို့ရပါတယ်)
+    if (confirm("မှတ်တမ်းအားလုံးကို ဖျက်ရန် သေချာပါသလား?")) {
+        localStorage.removeItem('recent_medicine');
+        loadRecent(); // UI ကို ချက်ချင်း Update လုပ်ပေးတာပါ
+    }
 }
 
 // အခြား modal ပိတ်ခြင်းနှင့် page switching logic များက အရင်အတိုင်းပဲ ထားနိုင်ပါတယ်
