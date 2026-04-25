@@ -5,13 +5,12 @@ async function init() {
     try {
         const response = await fetch('./data.json');
         medicineData = await response.json();
-        console.log("Data loaded successfully:", medicineData.length);
     } catch (err) {
         console.error("Error loading JSON:", err);
     }
 }
 
-// ၂။ ရှာဖွေမှုပြုလုပ်ခြင်း (Key နာမည်များကို disease နှင့် treatment သို့ ပြောင်းထားသည်)
+// ၂။ ရှာဖွေမှုပြုလုပ်ခြင်း
 function searchData() {
     const query = document.getElementById('searchInput').value.trim().toLowerCase();
     const resultsDiv = document.getElementById('results');
@@ -19,7 +18,6 @@ function searchData() {
 
     if (query === "") return;
 
-    // မင်းရဲ့ JSON structure အရ 'disease' ကို ရှာခိုင်းထားပါတယ်
     const filtered = medicineData.filter(item => 
         item.disease && item.disease.toLowerCase().includes(query)
     );
@@ -32,7 +30,6 @@ function searchData() {
     filtered.forEach(item => {
         const div = document.createElement('div');
         div.className = "result-item";
-        // disease ကို ခေါင်းစဉ်တပ်ပြီး treatment ကို အကျဉ်းပြမယ်
         const brief = item.treatment ? item.treatment.substring(0, 60) + "..." : "";
         div.innerHTML = `<strong>${item.disease}</strong><p>${brief}</p>`;
         div.onclick = () => openDetail(item);
@@ -40,32 +37,28 @@ function searchData() {
     });
 }
 
-// ၃။ အသေးစိတ်ပြသခြင်း (Modal ထဲတွင် ပေါ်မည့်စာသားများ)
+// ၃။ အသေးစိတ်ပြသခြင်း
 function openDetail(item) {
     document.getElementById('modalTitle').innerText = item.disease;
-    
-    // Treatment နဲ့ Warning ကို ပေါင်းပြပေးပါမယ်
     let fullText = `【ဆေးနည်း】\n${item.treatment}`;
     if(item.warning) {
         fullText += `\n\n【သတိပြုရန်】\n${item.warning}`;
     }
-    
     document.getElementById('modalBody').innerText = fullText;
     document.getElementById('detailModal').style.display = "block";
 
-    // Recent ထဲထည့်ခြင်း
     saveToRecent(item);
 }
 
 // ၄။ Recent သိမ်းဆည်းခြင်း
 function saveToRecent(item) {
     let recent = JSON.parse(localStorage.getItem('recent_medicine')) || [];
-    recent = recent.filter(r => r.id !== item.id); // ID နဲ့ စစ်ပြီး ပုံစံတူဖယ်
+    recent = recent.filter(r => r.id !== item.id);
     recent.unshift(item);
     localStorage.setItem('recent_medicine', JSON.stringify(recent.slice(0, 20)));
 }
 
-// ၅။ Recent List ပြန်ပြတဲ့ function ကိုလည်း update လုပ်ထားဖို့လိုပါတယ်
+// ၅။ Recent List ပြသခြင်း
 function loadRecent() {
     const listDiv = document.getElementById('recentList');
     const clearBtn = document.getElementById('clearBtn');
@@ -73,17 +66,16 @@ function loadRecent() {
     
     if (recent.length === 0) {
         listDiv.innerHTML = "<p style='text-align:center; padding:50px; color:#999;'>ရှာဖွေမှုမှတ်တမ်း မရှိသေးပါ။</p>";
-        if(clearBtn) clearBtn.style.display = "none"; // မှတ်တမ်းမရှိရင် ခလုတ်ဖျောက်ထားမယ်
+        if(clearBtn) clearBtn.style.display = "none";
         return;
     }
 
-    if(clearBtn) clearBtn.style.display = "block"; // မှတ်တမ်းရှိရင် ခလုတ်ပြန်ပြမယ်
+    if(clearBtn) clearBtn.style.display = "block";
     listDiv.innerHTML = "";
-    
     recent.forEach(item => {
         const div = document.createElement('div');
         div.className = "result-item";
-        div.innerHTML = `<strong>${item.disease}</strong>`;
+        div.innerHTML = `<strong>${item.disease}</strong><p>${item.treatment.substring(0, 50)}...</p>`;
         div.onclick = () => openDetail(item);
         listDiv.appendChild(div);
     });
@@ -91,14 +83,12 @@ function loadRecent() {
 
 // ၆။ Recent အားလုံးကို ဖျက်ခြင်း
 function clearRecent() {
-    // Confirm box ပြချင်ရင် သုံးပါ (မသုံးချင်ရင် direct ဖျက်လို့ရပါတယ်)
     if (confirm("မှတ်တမ်းအားလုံးကို ဖျက်ရန် သေချာပါသလား?")) {
         localStorage.removeItem('recent_medicine');
-        loadRecent(); // UI ကို ချက်ချင်း Update လုပ်ပေးတာပါ
+        loadRecent();
     }
 }
 
-// အခြား modal ပိတ်ခြင်းနှင့် page switching logic များက အရင်အတိုင်းပဲ ထားနိုင်ပါတယ်
 function closeModal() {
     document.getElementById('detailModal').style.display = "none";
 }
@@ -119,3 +109,4 @@ function showPage(pageId, title) {
 }
 
 init();
+
