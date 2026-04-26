@@ -81,12 +81,10 @@ function loadRecent() {
     });
 }
 
-// ၆။ Recent အားလုံးကို ဖျက်ခြင်း
-function clearRecent() {
-    if (confirm("မှတ်တမ်းအားလုံးကို ဖျက်ရန် သေချာပါသလား?")) {
-        localStorage.removeItem('recent_medicine');
-        loadRecent();
-    }
+function removeFromRecent(i) {
+    recentItems.splice(i, 1);
+    localStorage.setItem('recentMedicine', JSON.stringify(recentItems));
+    updateRecentUI();
 }
 
 function closeModal() {
